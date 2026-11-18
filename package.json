@@ -1,0 +1,10 @@
+{
+  "name": "tracker-ingest-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "浏览器埋点接收服务与离线缓存模拟器：批量上报、断网重连、乱序待处理、幂等去重、部分确认重试、一键回放验证",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scripts/selftest.js"
+  }
+}

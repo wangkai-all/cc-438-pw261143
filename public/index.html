@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>埋点接收服务 · 离线缓存模拟器</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="viz-root">
+  <header class="topbar">
+    <div>
+      <h1>埋点接收服务 · 离线缓存模拟器</h1>
+      <p class="subtitle">批量上报 / 断网缓存 / 重连补发 / 乱序待处理 / 按会话+序号幂等去重</p>
+    </div>
+    <button id="themeToggle" class="btn ghost" type="button">切换主题</button>
+  </header>
+
+  <!-- 全局统计 -->
+  <section class="tiles" id="tiles" aria-label="全局统计"></section>
+
+  <main class="layout">
+    <!-- 左列：客户端模拟器 -->
+    <div class="col">
+      <section class="card">
+        <h2>客户端模拟器</h2>
+        <div class="form-grid">
+          <label>设备 ID <input id="deviceId" value="device-A" maxlength="32"></label>
+          <label>会话 ID <input id="sessionId" value="sess-1" maxlength="32"></label>
+          <label>批量大小 <input id="batchSize" type="number" min="1" max="50" value="10"></label>
+          <label>每次生成 <input id="genCount" type="number" min="1" max="100" value="10"></label>
+        </div>
+        <div class="btn-row">
+          <button id="btnGen" class="btn" type="button">生成事件</button>
+          <button id="btnFlush" class="btn primary" type="button">立即上报</button>
+          <button id="btnAuto" class="btn" type="button" aria-pressed="false">自动产生：关</button>
+        </div>
+        <div class="btn-row">
+          <button id="btnOffline" class="btn warn" type="button" aria-pressed="false">网络：在线</button>
+          <button id="btnFlaky" class="btn warn" type="button" aria-pressed="false">服务端故障：关</button>
+          <button id="btnReset" class="btn danger" type="button">重置全部</button>
+        </div>
+        <p class="hint" id="cacheHint">本地缓存 0 条 · 下一序号 1</p>
+        <div class="cache-bar" id="cacheBar" role="img" aria-label="本地缓存水位"></div>
+      </section>
+
+      <section class="card">
+        <h2>补发记录（客户端）</h2>
+        <p class="hint">仅重试未确认的事件；请求失败时整批保留。断网期间事件持久化在 localStorage。</p>
+        <ul id="clientLog" class="log"></ul>
+      </section>
+
+      <section class="card">
+        <h2>一键回放 · 验证结果稳定</h2>
+        <p class="hint">固定种子执行同一剧本：正常上报 → 断网缓存 → 重连补发 → 故障重试。每轮重置后重放，最终状态哈希应完全一致。</p>
+        <div class="btn-row">
+          <button id="btnReplay" class="btn primary" type="button">▶ 一键回放（3 轮）</button>
+        </div>
+        <div id="replayResult" class="replay-result" aria-live="polite"></div>
+      </section>
+    </div>
+
+    <!-- 右列：服务端看板 -->
+    <div class="col">
+      <section class="card">
+        <h2>接收水位（按设备会话）</h2>
+        <div id="sessions"></div>
+      </section>
+
+      <section class="card">
+        <h2>乱序分布（缺口长度直方图）</h2>
+        <div id="oooChart"></div>
+        <details class="table-toggle">
+          <summary>表格视图</summary>
+          <table id="oooTable" class="data"></table>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>待处理区</h2>
+        <div id="pendingArea"></div>
+        <h3>最近晋升</h3>
+        <ul id="promotedLog" class="log compact"></ul>
+      </section>
+
+      <section class="card">
+        <h2>重复丢弃与服务端补发记录</h2>
+        <table id="dupTable" class="data"></table>
+      </section>
+    </div>
+  </main>
+</div>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>
